@@ -1,22 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useMutation } from '@apollo/client/react';
+import { useEffect, useState } from "react";
+import { useMutation } from "@apollo/client/react";
 
 import {
   CREAR_USUARIO,
   ACTUALIZAR_USUARIO,
   OBTENER_USUARIOS,
-} from '../graphql/operaciones';
+} from "../graphql/operaciones";
 
 const inicial = {
-  nombre: '',
-  correo: '',
-  edad: '',
+  nombre: "",
+  correo: "",
+  edad: "",
 };
 
-export default function FormularioUsuario({
-  usuarioEditar,
-  alTerminar,
-}) {
+export default function FormularioUsuario({ usuarioEditar, alTerminar }) {
   const [formulario, setFormulario] = useState(inicial);
 
   const opciones = {
@@ -24,22 +21,18 @@ export default function FormularioUsuario({
   };
 
   const [crear] = useMutation(CREAR_USUARIO, opciones);
-
-  const [actualizar] = useMutation(
-    ACTUALIZAR_USUARIO,
-    opciones
-  );
+  const [actualizar] = useMutation(ACTUALIZAR_USUARIO, opciones);
 
   useEffect(() => {
-    if (usuarioEditar) {
-      setFormulario({
-        nombre: usuarioEditar.nombre,
-        correo: usuarioEditar.correo,
-        edad: usuarioEditar.edad,
-      });
-    } else {
-      setFormulario(inicial);
-    }
+    setFormulario(
+      usuarioEditar
+        ? {
+            nombre: usuarioEditar.nombre,
+            correo: usuarioEditar.correo,
+            edad: usuarioEditar.edad,
+          }
+        : inicial,
+    );
   }, [usuarioEditar]);
 
   const cambiar = (e) => {
@@ -78,11 +71,7 @@ export default function FormularioUsuario({
 
   return (
     <form onSubmit={guardar}>
-      <h2>
-        {usuarioEditar
-          ? 'Editar usuario'
-          : 'Nuevo usuario'}
-      </h2>
+      <h2>{usuarioEditar ? "Editar usuario" : "Nuevo usuario"}</h2>
 
       <input
         name="nombre"
@@ -111,11 +100,7 @@ export default function FormularioUsuario({
         required
       />
 
-      <button type="submit">
-        {usuarioEditar
-          ? 'Actualizar'
-          : 'Guardar'}
-      </button>
+      <button type="submit">{usuarioEditar ? "Actualizar" : "Guardar"}</button>
     </form>
   );
 }
