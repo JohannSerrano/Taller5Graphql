@@ -1,13 +1,4 @@
-const cors = require("cors");
-
-const app = express();
-app.use(cors());
-
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema,
-    rootValue: root,
-    graphiql: true,
-  }),
-);
+// Permite seguir usando "node index.js" desde la carpeta del taller.
+require("./src/index").start().catch(() => {
+  process.exitCode = 1;
+});
