@@ -1,15 +1,17 @@
 const { buildSchema } = require("graphql");
 
 const schema = buildSchema(`
-    type User {
-        id: ID!
-        name: String!
-        email: String!
+    type Usuario {
+        id: Int!
+        nombre: String!
+        correo: String!
+        edad: Int!
     }
 
-    input UserInput {
-        name: String!
-        email: String!
+    input UsuarioInput {
+        nombre: String!
+        correo: String!
+        edad: Int!
     }
 
     type Product {
@@ -31,19 +33,17 @@ const schema = buildSchema(`
         success: Boolean!
         message: String!
     }
+type Query {
+  usuarios: [Usuario!]!
+  usuario(id: Int!): Usuario
 
-    type Query {
-        users: [User!]!
-        user(id: ID!): User
-
-        products: [Product!]!
-        product(id: ID!): Product
-    }
-
+  products: [Product!]!
+  product(id: ID!): Product
+}
     type Mutation {
-        createUser(input: UserInput!): User!
-        updateUser(id: ID!, input: UserInput!): User!
-        deleteUser(id: ID!): DeleteResult!
+        crearUsuario(datos: UsuarioInput!): Usuario!
+        actualizarUsuario(id: Int!, datos: UsuarioInput!): Usuario!
+        eliminarUsuario(id: Int!): Usuario!
 
         createProduct(input: ProductInput!): Product!
         updateProduct(id: ID!, input: ProductInput!): Product!

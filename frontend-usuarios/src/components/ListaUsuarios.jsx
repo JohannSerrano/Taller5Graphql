@@ -1,8 +1,6 @@
-import { useMutation, useQuery } from '@apollo/client/react';
-import {
-  OBTENER_USUARIOS,
-  ELIMINAR_USUARIO,
-} from '../graphql/operaciones';
+import { useQuery, useMutation } from "@apollo/client/react";
+
+import { OBTENER_USUARIOS, ELIMINAR_USUARIO } from "../graphql/operaciones";
 
 export default function ListaUsuarios({ alEditar }) {
   const { loading, error, data } = useQuery(OBTENER_USUARIOS);
@@ -11,28 +9,20 @@ export default function ListaUsuarios({ alEditar }) {
     refetchQueries: [{ query: OBTENER_USUARIOS }],
   });
 
-  if (loading) {
-    return <p>Cargando usuarios...</p>;
-  }
+  if (loading) return <p>Cargando usuarios...</p>;
 
   if (error) {
     return <p>Error: {error.message}</p>;
   }
 
   const eliminar = async (id) => {
-    const confirmar = window.confirm(
-      '¿Desea eliminar este usuario?'
-    );
-
-    if (!confirmar) {
-      return;
+    if (confirm("¿Desea eliminar este usuario?")) {
+      await eliminarUsuario({
+        variables: {
+          id: Number(id),
+        },
+      });
     }
-
-    await eliminarUsuario({
-      variables: {
-        id: Number(id),
-      },
-    });
   };
 
   return (
@@ -56,19 +46,9 @@ export default function ListaUsuarios({ alEditar }) {
             <td>{usuario.edad}</td>
 
             <td>
-              <button
-                type="button"
-                onClick={() => alEditar(usuario)}
-              >
-                Editar
-              </button>
+              <button onClick={() => alEditar(usuario)}>Editar</button>
 
-              <button
-                type="button"
-                onClick={() => eliminar(usuario.id)}
-              >
-                Eliminar
-              </button>
+              <button onClick={() => eliminar(usuario.id)}>Eliminar</button>
             </td>
           </tr>
         ))}

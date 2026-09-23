@@ -4,15 +4,24 @@ const pool = require("../config/db");
 // VALIDACIÓN DE USUARIOS
 // ==========================
 
-function cleanUser(input) {
-  const name = input.name.trim();
-  const email = input.email.trim().toLowerCase();
+function cleanUser(datos) {
+  const nombre = datos.nombre.trim();
+  const correo = datos.correo.trim().toLowerCase();
+  const edad = Number(datos.edad);
 
-  if (!name || !email) {
+  if (!nombre || !correo) {
     throw new Error("Nombre y correo son obligatorios");
   }
 
-  return { name, email };
+  if (!Number.isInteger(edad) || edad < 1) {
+    throw new Error("La edad debe ser un número entero mayor que cero");
+  }
+
+  return {
+    nombre,
+    correo,
+    edad,
+  };
 }
 
 // ==========================
@@ -50,44 +59,60 @@ const root = {
   // USUARIOS
   // ==========================
 
-  users: async () => {
+  usuarios: async () => {
     const [rows] = await pool.execute(
-      "SELECT id, name, email FROM users ORDER BY id",
+      `SELECT
+      id,
+      name AS nombre,
+      email AS correo,
+      age AS edad
+    FROM users
+    ORDER BY id`,
     );
 
     return rows;
   },
 
-  user: async ({ id }) => {
+  usuario: async ({ id }) => {
     const [rows] = await pool.execute(
-      "SELECT id, name, email FROM users WHERE id = ?",
+      `SELECT
+      id,
+      name AS nombre,
+      email AS correo,
+      age AS edad
+    FROM users
+    WHERE id = ?`,
       [id],
     );
 
     return rows[0] || null;
   },
 
-  createUser: async ({ input }) => {
-    const { name, email } = cleanUser(input);
+  crearUsuario: async ({ datos }) => {
+    const { nombre, correo, edad } = cleanUser(datos);
 
     const [result] = await pool.execute(
-      "INSERT INTO users (name, email) VALUES (?, ?)",
-      [name, email],
+      `INSERT INTO users (name, email, age)
+     VALUES (?, ?, ?)`,
+      [nombre, correo, edad],
     );
 
     return {
       id: result.insertId,
-      name,
-      email,
+      nombre,
+      correo,
+      edad,
     };
   },
 
-  updateUser: async ({ id, input }) => {
-    const { name, email } = cleanUser(input);
+  actualizarUsuario: async ({ id, datos }) => {
+    const { nombre, correo, edad } = cleanUser(datos);
 
     const [result] = await pool.execute(
-      "UPDATE users SET name = ?, email = ? WHERE id = ?",
-      [name, email, id],
+      `UPDATE users
+     SET name = ?, email = ?, age = ?
+     WHERE id = ?`,
+      [nombre, correo, edad, id],
     );
 
     if (!result.affectedRows) {
@@ -96,25 +121,34 @@ const root = {
 
     return {
       id,
-      name,
-      email,
+      nombre,
+      correo,
+      edad,
     };
   },
 
-  deleteUser: async ({ id }) => {
-    const [result] = await pool.execute("DELETE FROM users WHERE id = ?", [id]);
+  eliminarUsuario: async ({ id }) => {
+    const [rows] = await pool.execute(
+      `SELECT
+      id,
+      name AS nombre,
+      email AS correo,
+      age AS edad
+    FROM users
+    WHERE id = ?`,
+      [id],
+    );
 
-    return result.affectedRows
-      ? {
-          success: true,
-          message: `Usuario ${id} eliminado`,
-        }
-      : {
-          success: false,
-          message: `No existe el usuario ${id}`,
-        };
+    if (!rows.length) {
+      throw new Error(`No existe el usuario ${id}`);
+    }
+
+    const usuario = rows[0];
+
+    await pool.execute("DELETE FROM users WHERE id = ?", [id]);
+
+    return usuario;
   },
-
   // ==========================
   // PRODUCTOS
   // ==========================
